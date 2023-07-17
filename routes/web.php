@@ -19,3 +19,5 @@ Route::get('/', function () {
 });
 Route::get('onlineform', [UserController::class, 'onlineform']);
 Route::post('onlineform', [UserController::class, 'save']);
+
+Route::get('program', [UserController::class, 'program']);

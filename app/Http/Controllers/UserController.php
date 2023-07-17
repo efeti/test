@@ -15,21 +15,21 @@ class UserController extends Controller
 {
     public function onlineform()
     {
-            return view('onlineform');
+        return view('onlineform');
     }
 
     public function save(Request $request)
     {
-       
+
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'regex:/^(.+)@(yahoo\.com|gmail\.com)$/'],
             'phone' => 'required|digits:11',
         ]);
-        
+
         if ($validator->fails()) {
             $errors = $validator->errors();
             $failedFields = $errors->keys();
-            
+
 
             return response()->json([
                 'success' => false,
@@ -37,11 +37,11 @@ class UserController extends Controller
                 'failedFields' => $failedFields,
                 'errors' => $errors,
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }else {
+        } else {
             $name = $request->input('name');
             $email = $request->input('email');
             $phone = $request->input('phone');
-        
+
             // Save the data to the database
             // Example code assuming you have a "User" model:
             $user = new User();
@@ -80,7 +80,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             $failedFields = $errors->keys();
-            
+
 
             return response()->json([
                 'success' => false,
@@ -100,16 +100,56 @@ class UserController extends Controller
 
         $registration->save();
 
-     
+
         $response = [
             'phone_number' => $request->phone_number,
             'mobile_network' => $request->mobile_network,
             'status' => 'success',
             'message' => 'Registration successful'
         ];
-logger('here');
+
         // Return the JSON response
         return response()->json($response);
+    }
 
+
+
+    public function  encryptText($text, $key, $iv)
+    {
+        $encrypted = openssl_encrypt($text, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+        return bin2hex($encrypted);
+    }
+
+    public function decryptText($encryptedText, $key, $iv)
+    {
+        $encryptedText = hex2bin($encryptedText);
+        $decrypted = openssl_decrypt($encryptedText, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+        return $decrypted;
+    }
+
+    public function program()
+    {
+
+        // Text to encrypt
+        $text = 'Welcome to Lagos';
+
+        // Encryption key (256-bit)
+        $key = '0123456789abcdef0123456789abcdef';
+
+        // Initialization vector (IV) - 16 bytes
+        $iv = '1234567890abcdef';
+
+        // Encrypt the text
+        $encryptedText = $this->encryptText($text, $key, $iv);
+        echo 'Encrypted: ' . $encryptedText . '<br>';
+
+        // Decrypt the text
+        $decryptedText = $this->decryptText($encryptedText, $key, $iv);
+        echo 'Decrypted: ' . $decryptedText;
+
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Data saved successfully',
+        // ], 200);
     }
 }
